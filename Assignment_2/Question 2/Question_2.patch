@@ -1,0 +1,37 @@
+--- /home/kernelWithCustomSYSCALL/linux-6.0.9/arch/x86/entry/syscalls/syscall_64.tbl    2022-11-16 14:34:15.000000000 +0530
++++ /home/kernel/linux-6.0.9/arch/x86/entry/syscalls/syscall_64.tbl     2022-11-20 02:49:19.680000000 +0530
+@@ -372,6 +372,7 @@
+ 448    common  process_mrelease        sys_process_mrelease
+ 449    common  futex_waitv             sys_futex_waitv
+ 450    common  set_mempolicy_home_node sys_set_mempolicy_home_node
++451     common  kernel_2d_memcpy       sys_kernel_2D_memcpy
+ 
+ #
+ # Due to a historical design error, certain syscalls are numbered differently
+
+--- /home/kernelWithCustomSYSCALL/linux-6.0.9/kernel/sys.c      2022-11-16 14:34:15.000000000 +0530
++++ /home/kernel/linux-6.0.9/kernel/sys.c       2022-11-24 20:12:51.250000000 +0530
+@@ -463,6 +463,23 @@
+        return retval;
+ }
+
++SYSCALL_DEFINE2(kernel_2D_memcpy , float* , sourceArray , float* , destinationArray)
++{
++    float helperArray[5][5];
++
++    if (__copy_from_user(helperArray , sourceArray , sizeof(helperArray)) != 0)
++    {
++       return -EFAULT;
++    }
++
++    if (__copy_to_user(destinationArray , helperArray , sizeof(helperArray)) != 0)
++    {
++       return -EFAULT;
++    }
++
++    return 0;
++}
++
+ SYSCALL_DEFINE1(setgid, gid_t, gid)
+ {
+        return __sys_setgid(gid);
